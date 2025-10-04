@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToDoリスト</title>
+  <style>
+    body {
+      background-color: rgb(241, 246, 250);
+    }
+    .container {
+      max-width: 470px;
+      min-height: 98vh;
+      margin: 0 auto;
+      padding: 13px;
+      box-sizing: border-box;
+      background-color: rgb(208, 237, 255);
+      border-radius: 16px;
+      box-shadow:  
+        10px -2px 10px -6px rgba(65, 111, 168, 0.2), 
+        -10px -2px 10px -6px rgba(65, 111, 168, 0.2);
+  }
+
+    #textbox, #datebox {
+      padding: 3px;
+      margin-bottom: 5px;
+    }
+    #textbox {
+      padding-right: 4em;
+    }
+    .list { 
+      list-style-type: none;
+      padding-inline-start: 0px;
+    }
+    .content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px;
+      background-color: #afcdf9;
+      border-radius: 6px;
+      margin-bottom: 5px;
+      box-shadow: -0.5px -0.5px 5px 2px rgba(255, 255, 255, 0.3);
+    }
+
+    .left-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .date {
+      font-size: 0.8em;
+      color: #333;
+      margin-right: 1px;
+      margin-left: 1px;
+    }
+
+    .sortable-ghost {
+      opacity: 0.5;
+      background-color: #215bb3;
+      border-radius: 6px;
+    }
+
+    .delBtn {
+      background-color: rgb(248, 37, 37);
+      border: rgb(181, 9, 9) 1px solid;
+      color: #fff;
+      border-radius: 6px;
+      padding: 0.25em 1em;
+    }
+    .upper {
+      position: relative;
+    }
+    #addbtn {
+      position: absolute;
+      background-color: rgb(50, 32, 248);
+      border: rgb(11, 4, 84) 1px solid;
+      color: #fff;
+      border-radius: 6px;
+      padding: 1.5em 1.5em;
+      left: 15.5em; /*ちょうどいい距離*/
+    }
+    #today {
+        background-color: rgb(90, 90, 90);
+        border: rgb(33, 33, 33) 1px solid;
+        color: #fff;
+        border-radius: 6px;
+        padding: 0.25em 0.5em;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script>
+  // 今日ボタン
+  function today() {
+    let dateInput = document.getElementById("datebox");
+    let now = new Date();
+
+    // mm/dd 形式にする
+    let month = now.getMonth() + 1;
+    let day = now.getDate();
+
+    // ゼロ埋めしたいなら String().padStart(2, "0") を使う
+    let formatted = month + "/" + day;
+
+    dateInput.value = formatted;
+  }
+
+  function add() {
+    let input = document.getElementById("textbox");
+    let dateInput = document.getElementById("datebox");
+    let parent = document.getElementById("list");
+
+    if (input.value != "") {
+      let li = document.createElement("li");
+      li.className = "content";
+
+      let leftGroup = document.createElement("div");
+      leftGroup.className = "left-group";
+
+      // 日付を処理
+      let rawDate = dateInput.value;
+      let displayDate = "";
+      if (rawDate) {
+        let parts = rawDate.split("/");
+        if (parts.length === 3) {
+          // 年あり → 下2桁表示
+          displayDate = parts[0].slice(-2) + "/" + parts[1] + "/" + parts[2];
+        } else if (parts.length === 2) {
+          // 月/日
+          displayDate = parts[0] + "/" + parts[1];
+        }
+      } else {
+        displayDate = "無期限"
+      }
+
+      if (displayDate) {
+        let dateSpan = document.createElement("span");
+        dateSpan.className = "date";
+        dateSpan.textContent = displayDate;
+        leftGroup.appendChild(dateSpan);
+      }
+
+      let checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "checkbox";
+
+      let span = document.createElement("span");
+      span.textContent = input.value;
+
+      checkbox.onchange = function () {
+        if (checkbox.checked) {
+          span.style.color = "gray";
+          span.style.fontStyle = "italic";
+          li.style.backgroundColor = "#c6dcfd";
+        } else {
+          span.style.color = "black";
+          span.style.fontStyle = "";
+          li.style.backgroundColor = "#afcdf9";
+        }
+      };
+
+      leftGroup.appendChild(checkbox);
+      leftGroup.appendChild(span);
+
+      let delBtn = document.createElement("button");
+      delBtn.className = "delBtn";
+      delBtn.textContent = "削除";
+      delBtn.onclick = function () {
+        parent.removeChild(li);
+      };
+
+      li.appendChild(leftGroup);
+      li.appendChild(delBtn);
+      parent.appendChild(li);
+
+      input.value = "";
+      dateInput.value = "";
+    }
+  }
+
+  window.onload = function () {
+    new Sortable(document.getElementById("list"), {
+      animation: 150,
+      ghostClass: "sortable-ghost",
+      chosenClass: "sortable-chosen",
+    });
+  };
+</script>
+
+</head>
+<body>
+  <div class="container">
+      <div class="upper">
+          <h1>ToDoリスト レベル3</h1>
+          <button id="addbtn" onclick="add()">追加</button>
+          <input type="text" id="textbox" placeholder="やること"><br>
+          <input type="text" id="datebox" placeholder="期限の日付: mm/dd">
+          <button id="today" onclick="today()">今日</button>
+          
+      </div>
+      <ol id="list" class="list"></ol>
+  </div>
+</body>
+</html>
